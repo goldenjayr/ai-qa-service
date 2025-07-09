@@ -113,14 +113,10 @@ async def analyzePage(flow):
             "frictionPoints": parsed.flow[0].frictionPoints,
             "recommendations": parsed.flow[0].recommendations,
         }
-        with open(json_filename, 'w', encoding='utf-8') as f:
-            json.dump(json_output, f, indent=4)
-        print(f"Result saved to {json_filename}")
 
         # --- Save to Prisma DB ---
-
         await save_to_db(json_output)
-        print("Result also saved to the database via Prisma.")
+        print("Result saved to the database via Prisma.")
     else:
         print('No result')
 
@@ -130,18 +126,50 @@ async def main():
 
     flows = [
         {
-            "flow_name": "Site Health and Core Functionality Check",
-            "flow_type": "System Check - Sanity Test",
+            "flow_name": "Storefront Site Health and Core Functionality Check",
+            "flow_type": "system_check",
             "url": "https://wear.23point5.com",
             "service_type": "storefront",
             "steps": [
                 "Step 1: Visit the homepage and record the HTTP status code. If 200, set `status` to 'Operational'.",
                 "Step 2: Measure page load time (in ms) and store as `avgLatency`.",
                 "Step 3: During navigation, track failed requests (4xx/5xx) and calculate `errorRate` as (failures / total requests).",
-                "Step 4: Visit at least 3 key pages (Homepage, Product Listing, Product Detail). If all load correctly, assign a `healthScore` of ~99%.",
+                "Step 4: Visit at least 3 key pages (Homepage, Product Listing, Product Detail). If all load correctly, assign a `healthScore` example: ~99%.",
                 "Step 5: Based on above results, generate a rough `aiSummary` describing if the site is generally working fine."
             ]
         },
+        {
+            "flow_name": "Dashboard Site Health and Core Functionality Check",
+            "flow_type": "system_check",
+            "url": "https://dashboard.23point5.com",
+            "service_type": "dashboard",
+            "steps": [
+                "Step 1: Visit the homepage and record the HTTP status code. If 200, set `status` to 'Operational'.",
+                "Step 2: Login to the dashboard using these credentials: username: jayr@23point5.com, password: 23Point5!!",
+                "Step 3: Measure page load time (in ms) and store as `avgLatency`.",
+                "Step 4: During navigation, track failed requests (4xx/5xx) and calculate `errorRate` as (failures / total requests).",
+                "Step 5: Visit at least 3 key pages. If all load correctly, assign a `healthScore` example: ~99%.",
+                "Step 6: Based on above results, generate a rough `aiSummary` describing if the site is generally working fine."
+            ]
+        },
+        {
+            "flow_name": "Design Studio Functionality and Stability Check",
+            "flow_type": "system_check",
+            "url": "https://design.23point5.com",
+            "service_type": "design-studio",
+            "steps": [
+                "Step 1: Access the design studio homepage and record the HTTP status code. If 200, set `status` to 'Operational'.",
+                "Step 2: Login using the following credentials: username: jayr@23point5.com, password: 23Point5!!",
+                "Step 3: Select a garment style (e.g., hoodie, t-shirt, sweatshirt). If style loads successfully, continue.",
+                "Step 4: Wait for the 3D canvas to fully render. Allow a few seconds for model and textures to load completely.",
+                "Step 5: Record the time until the design canvas becomes fully interactive as `canvasLoadTime` (in ms).",
+                "Step 6: Test core design actions: (a) add an image, (b) apply a solid color, (c) add text, (d) edit the text (font, size, position). Confirm each executes without bugs.",
+                "Step 7: Track all network requests during design interactions. Count any failed requests (4xx/5xx) and compute `errorRate` = (failures / total requests).",
+                "Step 8: If all core features function and there are no critical errors, assign a `healthScore` (e.g., 98–100%).",
+                "Step 9: Generate an `aiSummary` that briefly evaluates if the design experience is smooth, functional, and production-ready."
+            ]
+        }
+
         # {
         #     "flow_name": "Homepage to Product Discovery Flow",
         #     "flow_type": "User Journey - Top of Funnel",

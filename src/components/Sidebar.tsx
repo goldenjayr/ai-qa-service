@@ -19,7 +19,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, currentPage, onNavigat
       className={`bg-gray-900/70 backdrop-blur-xl border-r border-gray-800 transition-all duration-300 ${isSidebarOpen ? 'w-64' : 'w-20'} h-screen fixed top-0 left-0 flex flex-col z-40`}
     >
       <div className="flex items-center justify-center h-20 border-b border-gray-800">
-        <span className={`text-2xl font-bold text-white transition-opacity ${isSidebarOpen ? 'opacity-100' : 'opacity-0'}`}>AQA</span>
+        <span className={`text-2xl font-bold text-white transition-opacity ${isSidebarOpen ? 'opacity-100' : 'opacity-0'}`}>AI QA</span>
         <svg
           className={`w-8 h-8 text-cyan-400 absolute transition-opacity ${isSidebarOpen ? 'opacity-0' : 'opacity-100'}`}
           viewBox="0 0 24 24"

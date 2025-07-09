@@ -16,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const result = await Promise.all(
       services.map(async (service) => {
         const reports = await prisma.siteHealthReport.findMany({
-          where: { service_type: service.name.toLowerCase() },
+          where: { service_type: service.service_type },
           orderBy: { createdAt: 'desc' }
         });
 
@@ -136,7 +136,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       })
     );
 
-    console.log("🚀 ~ handler ~ result:", result)
     return res.status(200).json(result);
   } catch (error) {
     console.error('API Error:', error);

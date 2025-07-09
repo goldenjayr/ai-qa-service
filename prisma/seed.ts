@@ -5,19 +5,17 @@ const prisma = new PrismaClient();
 async function main() {
   // Default service data
   const services = [
-    { id: 1, name: 'Storefront' },
-    { id: 2, name: 'Payments' },
-    { id: 3, name: 'Export Service' },
-    { id: 4, name: 'AI Chatbot' },
-    { id: 5, name: 'Mockup Generator' },
-    { id: 6, name: 'Notifications' },
-    { id: 7, name: 'Analytics' },
+    { id: 1, name: 'Storefront', service_type: 'storefront' },
+    { id: 2, name: 'Dashboard', service_type: 'dashboard' },
+    { id: 3, name: 'Export Service', service_type: 'export-service' },
+    { id: 4, name: 'Design Studio', service_type: 'design-studio' },
+    { id: 5, name: 'Mockup Generator', service_type: 'mockup-generator' },
   ];
 
   for (const service of services) {
     try {
       await prisma.service.upsert({
-        where: { name: service.name },
+        where: { service_type: service.service_type },
         update: {},
         create: service,
       });
