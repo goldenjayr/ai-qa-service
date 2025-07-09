@@ -3,6 +3,7 @@
 export type Service = {
   id: number;
   name: string;
+  service_type: string;
   status: string;
   healthScore: number;
   aiSummary: string;
@@ -19,7 +20,7 @@ export type DailyHealthCheck = {
   date: string;
   status: string;
   summary: string;
-  details: string[];
+  details: string; // Now a single markdown string
   aiAnalysis: string;
 };
 

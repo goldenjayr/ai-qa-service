@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkBreaks from "remark-breaks"
 import StatusIcon from './StatusIcon';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CheckCircle, XCircle, ChevronDown, ChevronRight } from 'lucide-react';
@@ -22,7 +24,7 @@ const DailyHealthCheckCard: React.FC<DailyHealthCheckCardProps> = ({ check }) =>
           <StatusIcon status={check.status} />
           <div>
             <p className="font-bold text-gray-200">{new Date(check.date).toDateString()}</p>
-            <p className="text-sm text-gray-400">{check.summary}</p>
+            <p className="text-sm text-gray-400">{check.aiAnalysis}</p>
           </div>
         </div>
         {isExpanded ? <ChevronDown className="text-gray-400" /> : <ChevronRight className="text-gray-400" />}
@@ -37,23 +39,10 @@ const DailyHealthCheckCard: React.FC<DailyHealthCheckCardProps> = ({ check }) =>
           >
             <div className="border-t border-gray-700/50 p-4 space-y-4">
               <div>
-                <h4 className="font-semibold text-gray-300 mb-2">Checks Performed</h4>
-                <ul className="space-y-1 text-sm">
-                  {check.details.map((detail, i) => (
-                    <li key={i} className="flex items-center gap-2 text-gray-400">
-                      {detail.includes('FAILED') ? (
-                        <XCircle size={14} className="text-red-500" />
-                      ) : (
-                        <CheckCircle size={14} className="text-green-500" />
-                      )}
-                      <span>{detail}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold text-gray-300 mb-2">AI Analysis</h4>
-                <p className="text-sm text-gray-300 bg-cyan-900/20 p-3 rounded-md border border-cyan-500/20">{check.aiAnalysis}</p>
+                <h4 className="font-semibold text-gray-300 mb-2">Details</h4>
+                <div className="prose prose-invert max-w-none text-sm text-gray-400">
+                  <ReactMarkdown remarkPlugins={[remarkBreaks]} children={check.details} />
+                </div>
               </div>
             </div>
           </motion.div>

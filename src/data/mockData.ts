@@ -4,6 +4,7 @@ export const initialServicesData: Service[] = [
   {
     id: 1,
     name: "Storefront",
+    service_type: "storefront",
     status: "Operational",
     healthScore: 99.5,
     aiSummary: "The main e-commerce site is fully operational. All core user flows are performing within expected parameters.",
@@ -39,11 +40,7 @@ export const initialServicesData: Service[] = [
         date: "2025-07-04",
         status: "Passed",
         summary: "All checks passed successfully.",
-        details: [
-          "Homepage GET response: 200 OK",
-          "Product page load time: 1.2s",
-          "Checkout API latency: 150ms"
-        ],
+        details: "- Homepage GET response: 200 OK\n- Product page load time: 1.2s\n- Checkout API latency: 150ms",
         aiAnalysis: "The Storefront is healthy. User-facing latency is low and all critical endpoints are responsive. No anomalies detected."
       }
     ]
@@ -51,6 +48,7 @@ export const initialServicesData: Service[] = [
   {
     id: 2,
     name: "Design Studio",
+    service_type: "design-studio",
     status: "Operational",
     healthScore: 98.9,
     aiSummary: "The 3D product design service is stable. A minor increase in rendering time was observed for complex models, but it remains within SLOs.",
@@ -70,12 +68,7 @@ export const initialServicesData: Service[] = [
         date: "2025-07-04",
         status: "Passed",
         summary: "All checks passed successfully.",
-        details: [
-          "GET /v2/designs: 200 OK",
-          "POST /v2/designs: 201 Created",
-          "Texture Generator dependency: Healthy",
-          "Mockup Generator dependency: Healthy"
-        ],
+        details: "- GET /v2/designs: 200 OK\n- POST /v2/designs: 201 Created\n- Texture Generator dependency: Healthy\n- Mockup Generator dependency: Healthy",
         aiAnalysis: "The Design Studio is performing as expected. Core CRUD operations are functional and dependencies are responsive."
       }
     ]
@@ -84,6 +77,7 @@ export const initialServicesData: Service[] = [
     {
     id: 3,
     name: "Export Service",
+    service_type: "export-service",
     status: "Degraded Performance",
     healthScore: 72.1,
     aiSummary: "High failure rate for export jobs. The service is struggling to connect to the ERP to validate material SKUs.",
@@ -119,22 +113,14 @@ export const initialServicesData: Service[] = [
         date: "2025-07-04",
         status: "Failed",
         summary: "ERP connection timeouts are causing export failures.",
-        details: [
-          "POST /v1/export: 202 Accepted",
-          "ERP Connection Healthcheck: FAILED (Timeout)",
-          "PrintLayout dependency: Healthy"
-        ],
+        details: "- POST /v1/export: 202 Accepted\n- ERP Connection Healthcheck: FAILED (Timeout)\n- PrintLayout dependency: Healthy",
         aiAnalysis: "The primary issue is the connectivity to the ERP. The Export Service itself is running, but its core functionality is impaired by the failing upstream dependency. This is causing a significant backlog of export jobs."
       },
       {
         date: "2025-07-03",
         status: "Warning",
         summary: "Elevated latency on ERP connection.",
-        details: [
-          "POST /v1/export: 202 Accepted",
-          "ERP Connection Healthcheck: Passed (Latency: 4500ms)",
-          "PrintLayout dependency: Healthy"
-        ],
+        details: "- POST /v1/export: 202 Accepted\n- ERP Connection Healthcheck: Passed (Latency: 4500ms)\n- PrintLayout dependency: Healthy",
         aiAnalysis: "Latency to the ERP service increased dramatically yesterday afternoon, likely a precursor to today's timeouts. This suggests the issue is with the ERP service or the network path to it, not the Export Service itself."
       }
     ],
@@ -153,6 +139,7 @@ export const initialServicesData: Service[] = [
     {
     id: 4,
     name: "Texture Generator",
+    service_type: "texture-generator",
     status: "Operational",
     healthScore: 99.9,
     aiSummary: "Service is operating at peak efficiency. No issues detected.",
@@ -172,10 +159,7 @@ export const initialServicesData: Service[] = [
         date: "2025-07-04",
         status: "Passed",
         summary: "All checks passed successfully.",
-        details: [
-          "Image processing queue depth: 2",
-          "Average processing time: 300ms"
-        ],
+        details: "- Image processing queue depth: 2\n- Average processing time: 300ms",
         aiAnalysis: "The Texture Generator is nominal. Processing queue is low and job completion times are excellent."
       }
     ]
@@ -183,6 +167,7 @@ export const initialServicesData: Service[] = [
   {
     id: 5,
     name: "Mockup Generator",
+    service_type: "mockup-generator",
     status: "Operational",
     healthScore: 99.8,
     aiSummary: "Service is stable. All systems nominal.",
@@ -202,10 +187,7 @@ export const initialServicesData: Service[] = [
         date: "2025-07-04",
         status: "Passed",
         summary: "All checks passed successfully.",
-        details: [
-          "Scene rendering queue depth: 5",
-          "Average render time: 380ms"
-        ],
+        details: "- Scene rendering queue depth: 5\n- Average render time: 380ms",
         aiAnalysis: "The Mockup Generator is healthy and processing jobs efficiently."
       }
     ]
@@ -213,6 +195,7 @@ export const initialServicesData: Service[] = [
   {
     id: 6,
     name: "ERP",
+    service_type: "erp",
     status: "Operational",
     healthScore: 99.6,
     aiSummary: "ERP system is stable after the recent security patch. Monitoring all dependent services.",
@@ -232,10 +215,7 @@ export const initialServicesData: Service[] = [
         date: "2025-07-04",
         status: "Passed",
         summary: "All checks passed successfully.",
-        details: [
-          "GET /api/skus: 200 OK",
-          "Database connection pool: 95% available"
-        ],
+        details: "- GET /api/skus: 200 OK\n- Database connection pool: 95% available",
         aiAnalysis: "The ERP system is stable and responsive. No issues detected following yesterday's security patch."
       }
     ]
@@ -243,6 +223,7 @@ export const initialServicesData: Service[] = [
   {
     id: 7,
     name: "PrintLayout Generator",
+    service_type: "printlayout-generator",
     status: "Operational",
     healthScore: 97.5,
     aiSummary: "Service is operational, but showing slightly increased processing times due to upstream latency from the Export Service.",
@@ -262,10 +243,7 @@ export const initialServicesData: Service[] = [
         date: "2025-07-04",
         status: "Warning",
         summary: "Processing time has increased by 20%.",
-        details: [
-          "PDF generation time: 1100ms",
-          "Export Service dependency: Degraded"
-        ],
+        details: "- PDF generation time: 1100ms\n- Export Service dependency: Degraded",
         aiAnalysis: "The service itself is functional, but its performance is being negatively impacted by the degraded state of the upstream Export Service. This is a cascading effect."
       }
     ]

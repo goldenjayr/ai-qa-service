@@ -21,7 +21,7 @@ const ServiceDetailPage: React.FC<ServiceDetailPageProps> = ({ service, onBack }
       </button>
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-4xl font-bold text-gray-100">{service.name}</h1>
+          <h1 className="text-4xl font-bold text-gray-100 capitalize">{service.service_type}</h1>
           <div className="flex items-center gap-3 mt-2">
             <StatusIcon status={service.status} />
             <span className="text-lg text-gray-300">{service.status}</span>
