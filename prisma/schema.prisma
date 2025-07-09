@@ -1,0 +1,26 @@
+// Prisma schema for saving results from main.py
+
+generator python {
+  provider = "prisma-client-py"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model SiteHealthReport {
+  id                 Int      @id @default(autoincrement())
+  flow_name          String
+  url                String
+  service_type       String
+  status             String
+  healthScore        Float
+  avgLatency         Int
+  errorRate          Float
+  aiSummary          String
+  positiveHighlights String
+  frictionPoints     String
+  recommendations    String
+  createdAt          DateTime @default(now())
+}

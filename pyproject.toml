@@ -6,4 +6,5 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "browser-use>=0.4.2",
+    "prisma>=0.15.0",
 ]
