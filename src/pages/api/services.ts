@@ -22,7 +22,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         // Convert reports to dailyChecks
         const dailyChecks = reports.map((report) => {
+        console.log("🚀 ~ dailyChecks ~ report:", report)
           const sections: string[] = [];
+          if (report.detailedFindings) {
+            sections.push(`### **Detailed Findings**\n${report.detailedFindings}`);
+          }
           if (report.positiveHighlights) {
             sections.push(`### **Positive Highlights**\n${report.positiveHighlights}`);
           }
@@ -36,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return {
             date: report.createdAt.toISOString().slice(0, 10),
             status: report.status,
-            summary: report.positiveHighlights || 'No summary',
+            summary: report.detailedFindings || 'No summary',
             details: detailsMd,
             aiAnalysis: report.aiSummary
           };
@@ -50,7 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return {
           id: service.id,
           name: service.name,
-          service_type: latestReport?.service_type || '',
+          service_type: service.service_type,
           status: latestReport?.status || 'Unknown',
           healthScore: latestReport?.healthScore || 0,
           aiSummary: latestReport?.aiSummary || '',

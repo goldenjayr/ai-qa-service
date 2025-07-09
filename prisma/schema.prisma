@@ -25,12 +25,12 @@ model SiteHealthReport {
   positiveHighlights String
   frictionPoints     String
   recommendations    String
+  detailedFindings   String
   createdAt          DateTime @default(now())
 }
 
 model Service {
-  id   Int    @id @default(autoincrement())
-  name String
-  service_type String @unique
+  id           Int    @id @default(autoincrement())
+  name         String
+  service_type String
 }
-

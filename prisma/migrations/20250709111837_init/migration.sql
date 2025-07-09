@@ -1,7 +1,7 @@
 /*
   Warnings:
 
-  - Added the required column `service_type` to the `SiteHealthReport` table without a default value. This is not possible if the table is not empty.
+  - Added the required column `detailedFindings` to the `SiteHealthReport` table without a default value. This is not possible if the table is not empty.
 
 */
 -- RedefineTables
@@ -20,9 +20,10 @@ CREATE TABLE "new_SiteHealthReport" (
     "positiveHighlights" TEXT NOT NULL,
     "frictionPoints" TEXT NOT NULL,
     "recommendations" TEXT NOT NULL,
+    "detailedFindings" TEXT NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-INSERT INTO "new_SiteHealthReport" ("aiSummary", "avgLatency", "createdAt", "errorRate", "flow_name", "frictionPoints", "healthScore", "id", "positiveHighlights", "recommendations", "status", "url") SELECT "aiSummary", "avgLatency", "createdAt", "errorRate", "flow_name", "frictionPoints", "healthScore", "id", "positiveHighlights", "recommendations", "status", "url" FROM "SiteHealthReport";
+INSERT INTO "new_SiteHealthReport" ("aiSummary", "avgLatency", "createdAt", "errorRate", "flow_name", "frictionPoints", "healthScore", "id", "positiveHighlights", "recommendations", "service_type", "status", "url") SELECT "aiSummary", "avgLatency", "createdAt", "errorRate", "flow_name", "frictionPoints", "healthScore", "id", "positiveHighlights", "recommendations", "service_type", "status", "url" FROM "SiteHealthReport";
 DROP TABLE "SiteHealthReport";
 ALTER TABLE "new_SiteHealthReport" RENAME TO "SiteHealthReport";
 PRAGMA foreign_keys=ON;

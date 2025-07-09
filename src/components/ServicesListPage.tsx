@@ -41,7 +41,7 @@ const ServicesListPage: React.FC<ServicesListPageProps> = ({ onNavigate, service
               onClick={() => onNavigate('service-detail', service.id)}
               className="border-b border-gray-700/50 hover:bg-gray-700/30 cursor-pointer transition-colors"
             >
-              <td className="p-4 font-medium text-gray-200 capitalize">{service.service_type}</td>
+              <td className="p-4 font-medium text-gray-200 capitalize">{service.name}</td>
               <td className="p-4">
                 <div className="flex items-center gap-2">
                   <StatusIcon status={service.status} size={16} />
