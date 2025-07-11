@@ -34,3 +34,22 @@ model Service {
   name         String
   service_type String
 }
+
+model Issue {
+  id                   Int      @id @default(autoincrement())
+  flowName             String
+  element              String
+  pageUrl              String
+  domSelector          String?
+  action               String
+  expected             String
+  actual               String
+  error                String?
+  consoleNetworkErrors String?
+  screenshot           String?
+  severity             String?
+  timestamp            String?
+  stepsToReproduce     String   // Store as JSON string
+  createdAt            DateTime @default(now())
+}
+
