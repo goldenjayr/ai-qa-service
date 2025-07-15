@@ -4,6 +4,7 @@ import os
 
 QA_SERVICE_URL = os.environ.get("QA_SERVICE_URL", "http://localhost:3000")
 API_URL = f"{QA_SERVICE_URL}/api/issues"
+print(API_URL)
 
 def test_save_issue_via_api():
     data = {

@@ -22,7 +22,7 @@ fi
 # Start the script with PM2 and schedule it
 pm2 start "$SCRIPT_PATH" \
   --interpreter="$UV_BIN" \
-  --interpreter-args="run" \
+  --interpreter-args="run --env-file .env" \
   --name "$PROCESS_NAME" \
   --cron "$CRON_SCHEDULE"
 
