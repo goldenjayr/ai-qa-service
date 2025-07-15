@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import IssuesTable, { Issue } from "../../components/IssuesTable";
 import { PrismaClient } from "@prisma/client";
 
