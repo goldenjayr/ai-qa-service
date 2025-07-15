@@ -36,7 +36,7 @@ browser_session = BrowserSession(
 )
 
 
-DEVELOPMENT_MODE = False  # Toggle this to False for production/full crawl
+DEVELOPMENT_MODE = True  # Toggle this to False for production/full crawl
 
 import requests
 
