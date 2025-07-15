@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "setup:pm2-audit": "bash ./setup-pm2-daily-web-audit.sh",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
