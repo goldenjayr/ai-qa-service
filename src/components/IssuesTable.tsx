@@ -112,10 +112,24 @@ export default function IssuesTable({ issues }: { issues: Issue[] }) {
               <th style={thStyle}>Action</th>
               <th style={thStyle}>Expected</th>
               <th style={thStyle}>Actual</th>
-              <th style={{...thStyle, cursor: 'pointer'}} onClick={handleSeveritySort}>
-                Severity
-                {severitySort === "desc" && " ↓"}
-                {severitySort === "asc" && " ↑"}
+              <th
+                style={{
+                  ...thStyle,
+                  cursor: 'pointer',
+                  color: severitySort !== 'none' ? '#2563eb' : thStyle.color,
+                  background: severitySort !== 'none' ? '#eaf1fb' : thStyle.background,
+                  transition: 'background 0.18s, color 0.18s',
+                  userSelect: 'none',
+                }}
+                onClick={handleSeveritySort}
+                onMouseEnter={e => (e.currentTarget.style.background = '#dbeafe')}
+                onMouseLeave={e => (e.currentTarget.style.background = severitySort !== 'none' ? '#eaf1fb' : thStyle.background as string)}
+              >
+                <span style={{display: 'inline-flex', alignItems: 'center', gap: 4}}>
+                  Severity
+                  {severitySort === "desc" && <span style={{fontSize: 15}}>↓</span>}
+                  {severitySort === "asc" && <span style={{fontSize: 15}}>↑</span>}
+                </span>
               </th>
               <th style={thStyle}>Timestamp</th>
               <th style={thStyle}>Steps to Reproduce</th>
@@ -124,14 +138,50 @@ export default function IssuesTable({ issues }: { issues: Issue[] }) {
           <tbody>
             {sortedIssues.length === 0 ? (
               <tr>
-                <td colSpan={8} style={{ textAlign: "center", padding: "2rem" }}>No issues found for selected date range.</td>
+                <td colSpan={8} style={{
+                  textAlign: "center",
+                  padding: "2.5rem 1rem",
+                  color: '#7b869c',
+                  fontSize: 18,
+                  background: '#f7fafd',
+                  borderRadius: 10,
+                  fontWeight: 500,
+                  letterSpacing: '0.1px',
+                }}>
+                  <span style={{ fontSize: 34, display: 'block', marginBottom: 8 }}>😶‍🌫️</span>
+                  No issues found for selected date range.
+                </td>
               </tr>
             ) : (
               sortedIssues.map((issue: Issue, idx: number) => (
-                <tr key={issue.id ?? idx} style={{ background: idx % 2 === 0 ? "#fff" : "#f5f6fa" }}>
+                <tr
+                  key={issue.id ?? idx}
+                  style={{
+                    background: idx % 2 === 0 ? "#fff" : "#f5f6fa",
+                    transition: 'background 0.16s',
+                    cursor: 'pointer',
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = '#eaf3fa')}
+                  onMouseLeave={e => (e.currentTarget.style.background = idx % 2 === 0 ? "#fff" : "#f5f6fa")}
+                >
                   <td style={tdStyle}>{issue.element}</td>
                   <td style={{ ...tdStyle, maxWidth: 220, wordBreak: "break-all" }}>
-                    <a href={issue.pageUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#2a6be0", textDecoration: "underline" }}>{issue.pageUrl}</a>
+                    <a
+                      href={issue.pageUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        color: "#2563eb",
+                        textDecoration: "underline",
+                        fontWeight: 500,
+                        transition: 'color 0.16s',
+                        cursor: 'pointer',
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.color = '#174ea6')}
+                      onMouseLeave={e => (e.currentTarget.style.color = '#2563eb')}
+                    >
+                      {issue.pageUrl}
+                    </a>
                   </td>
                   <td style={tdStyle}>{issue.action}</td>
                   <td style={{ ...tdStyle, maxWidth: 200, wordBreak: "break-word" }}>{issue.expected}</td>
