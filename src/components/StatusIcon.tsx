@@ -4,7 +4,7 @@ import React from 'react';
 type StatusIconProps = { status: string; size?: number };
 
 const StatusIcon: React.FC<StatusIconProps> = ({ status, size = 20 }) => {
-  const statusMap: Record<string, JSX.Element> = {
+  const statusMap: Record<string, React.ReactNode> = {
     'Operational': <CheckCircle className="text-green-500" size={size} />,
     'Degraded Performance': <AlertTriangle className="text-yellow-500" size={size} />,
     'Partial Outage': <XCircle className="text-red-500" size={size} />,

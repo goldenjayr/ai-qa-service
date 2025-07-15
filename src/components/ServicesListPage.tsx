@@ -1,6 +1,4 @@
 import React from 'react';
-import { useEffect, useState } from 'react';
-import { fetchServices } from '../data/fetchServices';
 import StatusIcon from './StatusIcon';
 import type { Service } from '../types/types.ts';
 

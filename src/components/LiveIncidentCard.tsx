@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { AlertTriangle, Sparkles } from 'lucide-react';
 import LoadingSpinner from './LoadingSpinner';
 import type { RootCauseAnalysis } from '../types/types.ts';

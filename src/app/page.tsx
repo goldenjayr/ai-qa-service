@@ -42,7 +42,7 @@ export default function Home() {
                 setServices(data);
                 setLoading(false);
             })
-            .catch(err => {
+            .catch(() => {
                 setError('Failed to load services.');
                 setLoading(false);
             });

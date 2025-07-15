@@ -3,7 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkBreaks from "remark-breaks"
 import StatusIcon from './StatusIcon';
 import { AnimatePresence, motion } from 'framer-motion';
-import { CheckCircle, XCircle, ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import type { DailyHealthCheck } from '../types/types.ts';
 
 interface DailyHealthCheckCardProps {
@@ -18,7 +18,7 @@ const DailyHealthCheckCard: React.FC<DailyHealthCheckCardProps> = ({ check }) =>
     Failed: 'border-red-500/50',
   };
   return (
-    <div className={`bg-gray-800/60 backdrop-blur-sm border ${statusColors[check.status]} rounded-lg transition-all duration-300`}>
+    <div className={`bg-gray-800/60 backdrop-blur-sm border ${statusColors[check.status as keyof typeof statusColors]} rounded-lg transition-all duration-300`}>
       <div className="p-4 cursor-pointer flex justify-between items-center" onClick={() => setIsExpanded(!isExpanded)}>
         <div className="flex items-center gap-4">
           <StatusIcon status={check.status} />

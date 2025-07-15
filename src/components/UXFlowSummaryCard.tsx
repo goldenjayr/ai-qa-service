@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown } from 'lucide-react';
-import StatusIcon from './StatusIcon';
 import type { UXFlow } from '../types/types.ts';
 
 interface UXFlowSummaryCardProps {

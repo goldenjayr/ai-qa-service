@@ -1,6 +1,6 @@
 import React from 'react';
 
-type CustomTooltipProps = { active?: boolean; payload?: any[]; label?: string; unit?: string };
+type CustomTooltipProps = { active?: boolean; payload?: { color: string; name: string; value: number; unit?: string }[]; label?: string; unit?: string };
 
 const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
