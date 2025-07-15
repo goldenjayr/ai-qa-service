@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "setup:pm2-audit": "bash ./setup-pm2-daily-web-audit.sh",
+    "postinstall": "prisma generate",
+    "vercel-build": "prisma generate && prisma migrate deploy && next build",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
