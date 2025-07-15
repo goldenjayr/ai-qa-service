@@ -2,35 +2,108 @@
 
 A modern dashboard for monitoring application quality, service health, and user experience flows, built with **React**, **TypeScript**, and **Vite**.
 
+---
+
 ## Overview
 
 This application provides a holistic view of your application's backend services and user experience (UX) flows. It is designed for engineering and product teams to:
-- Monitor service health, uptime, latency, and error rates.
-- Investigate incidents with root cause analysis and historical trends.
-- Review AI-generated summaries and recommendations for each service.
-- Track UX funnel performance, conversion rates, and friction points.
-- Access operational and security reports.
 
-The app uses mock data for all dashboards and details, making it ideal for demos, prototyping, and front-end development.
+- Monitor service health, uptime, latency, and error rates
+- Investigate incidents with root cause analysis and historical trends
+- Review AI-generated summaries and recommendations for each service
+- Track UX funnel performance, conversion rates, and friction points
+- Access operational and security reports
+
+> **Note:** The app uses mock data for all dashboards and details, making it ideal for demos, prototyping, and front-end development.
+
+---
 
 ## Features
-- **Dashboard:** At-a-glance health for core services and UX flows.
-- **Service List & Detail:** Deep dive into each service's health, history, and AI analysis.
-- **UX Flows:** Visualize conversion funnels, drop-offs, and friction points.
-- **Reports:** Browse and review operational, security, and performance reports.
-- **AI Insights:** Summaries and recommendations powered by mock AI analysis.
-- **Developer Friendly:** Built with React, TypeScript, Vite, and TailwindCSS for rapid iteration.
+
+- **Dashboard:** At-a-glance health for core services and UX flows
+- **Service List & Detail:** Deep dive into each service's health, history, and AI analysis
+- **UX Flows:** Visualize conversion funnels, drop-offs, and friction points
+- **Reports:** Browse and review operational, security, and performance reports
+- **AI Insights:** Summaries and recommendations powered by mock AI analysis
+- **Developer Friendly:** Built with React, TypeScript, Vite, and TailwindCSS for rapid iteration
+
+---
 
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js (v18+ recommended)
 - npm
+- [uv](https://github.com/astral-sh/uv) (ultra-fast Python package manager and runner)
 
 ### Installation
+
 ```bash
 npm install
 ```
+
+### Setting up `uv`
+
+Install `uv` globally (recommended):
+
+```bash
+curl -Ls https://astral.sh/uv/install.sh | bash
+```
+
+Or see the [official uv installation guide](https://github.com/astral-sh/uv#installation) for other methods.
+
+---
+
+## Running Python Audits with `uv`
+
+This project uses `uv` to run the Python audit script (`daily_web_audit.py`) for maximum speed and reproducibility.
+
+- **To run the audit script manually:**
+
+  ```bash
+  uv run daily_web_audit.py
+  ```
+
+- **To set up the daily PM2 job (recommended):**
+
+  ```bash
+  npm run setup:pm2-audit
+  ```
+
+  This will schedule the script to run daily using PM2 and `uv`.
+
+- **To adjust the schedule:**
+
+  Edit the cron expression in `setup-pm2-daily-web-audit.sh` or re-run the setup script.
+
+---
+
+
+### Setting up uv
+
+Install uv globally (recommended):
+```bash
+curl -Ls https://astral.sh/uv/install.sh | bash
+```
+Or see the [official uv installation guide](https://github.com/astral-sh/uv#installation) for other methods.
+
+### Running Python Audits with uv
+
+This project uses `uv` to run the Python audit script (`daily_web_audit.py`) for maximum speed and reproducibility.
+
+- To run the audit script manually:
+  ```bash
+  uv run daily_web_audit.py
+  ```
+
+- To set up the daily PM2 job (recommended):
+  ```bash
+  npm run setup:pm2-audit
+  ```
+  This will schedule the script to run daily using PM2 and uv.
+
+- To adjust the schedule, edit the cron expression in `setup-pm2-daily-web-audit.sh` or re-run the setup script.
 
 ### Running Locally
 ```bash
