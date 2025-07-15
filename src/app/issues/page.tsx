@@ -5,7 +5,7 @@ export default async function IssuesPage() {
   const prisma = new PrismaClient();
   const dbIssues = await prisma.issue.findMany({ orderBy: { createdAt: "desc" } });
   // Map DB fields to camelCase for the client component
-  const issues = dbIssues.map((issue) => ({
+  const issues = dbIssues.map((issue: any) => ({
     id: issue.id,
     element: issue.element,
     pageUrl: issue.pageUrl,
