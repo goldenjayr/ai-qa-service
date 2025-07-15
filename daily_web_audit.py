@@ -4,10 +4,6 @@ import os
 from browser_use import Agent, Controller, BrowserSession
 from browser_use.llm import ChatGoogle
 from pydantic import BaseModel
-from prisma_client import prisma
-
-# Define the output format as a Pydantic model
-
 
 from typing import List, Optional
 
@@ -40,50 +36,36 @@ browser_session = BrowserSession(
 )
 
 
-async def save_to_db(json_output):
-    await prisma.connect()
-    await prisma.sitehealthreport.create(
-        data={
-            'flow_name': json_output['flow_name'],
-            'url': json_output['url'],
-            'service_type': json_output['service_type'],
-            'status': json_output['status'],
-            'healthScore': json_output['healthScore'],
-            'avgLatency': json_output['avgLatency'],
-            'errorRate': json_output['errorRate'],
-            'aiSummary': json_output['aiSummary'],
-            'positiveHighlights': json_output['positiveHighlights'],
-            'frictionPoints': json_output['frictionPoints'],
-            'recommendations': json_output['recommendations'],
-            'detailedFindings': json_output['detailedFindings'],
-        }
-    )
-    await prisma.disconnect()
-
-
 DEVELOPMENT_MODE = False  # Toggle this to False for production/full crawl
 
+import requests
+
 async def save_issues_to_db(flow_name, issues):
-    await prisma.connect()
+    QA_SERVICE_URL = os.environ.get("QA_SERVICE_URL", "http://localhost:3000")
+    API_URL = f"{QA_SERVICE_URL}/api/issues"
     for issue in issues:
-        await prisma.issue.create(
-            data={
-                'flowName': flow_name,
-                'element': issue.get('element', ''),
-                'pageUrl': issue.get('page_url', ''),
-                'domSelector': issue.get('dom_selector'),
-                'action': issue.get('action', ''),
-                'expected': issue.get('expected', ''),
-                'actual': issue.get('actual', ''),
-                'error': issue.get('error'),
-                'consoleNetworkErrors': issue.get('console_network_errors'),
-                'screenshot': issue.get('screenshot'),
-                'severity': issue.get('severity'),
-                'timestamp': issue.get('timestamp'),
-                'stepsToReproduce': json.dumps(issue.get('steps_to_reproduce', [])),
-            }
-        )
-    await prisma.disconnect()
+        data = {
+            'flowName': flow_name,
+            'element': issue.get('element', ''),
+            'pageUrl': issue.get('page_url', ''),
+            'domSelector': issue.get('dom_selector'),
+            'action': issue.get('action', ''),
+            'expected': issue.get('expected', ''),
+            'actual': issue.get('actual', ''),
+            'error': issue.get('error'),
+            'consoleNetworkErrors': issue.get('console_network_errors'),
+            'screenshot': issue.get('screenshot'),
+            'severity': issue.get('severity'),
+            'timestamp': issue.get('timestamp'),
+            'stepsToReproduce': json.dumps(issue.get('steps_to_reproduce', [])),
+        }
+        try:
+            response = requests.post(API_URL, json=data)
+            response.raise_for_status()
+            print(f"Issue saved via API: {response.json()}")
+        except Exception as e:
+            print(f"Failed to save issue via API: {e}")
+
 
 async def analyzePage(flow):
     llm = ChatGoogle(model='gemini-2.5-pro')
@@ -159,13 +141,13 @@ async def analyzePage(flow):
     history = await agent.run()
     result = history.final_result()
     print(result)
-    # Save result to a JSON file in the results folder
-    os.makedirs('results', exist_ok=True)
-    flow_name_safe = flow['flow_name'].replace(' ', '_').replace('&', 'and').replace('/', '_').lower()
-    result_path = f"results/{flow_name_safe}_result.json"
-    with open(result_path, 'w', encoding='utf-8') as f:
-        f.write(result if isinstance(result, str) else json.dumps(result, indent=2, ensure_ascii=False))
-    print(f"Result saved to {result_path}")
+    # # Save result to a JSON file in the results folder
+    # os.makedirs('results', exist_ok=True)
+    # flow_name_safe = flow['flow_name'].replace(' ', '_').replace('&', 'and').replace('/', '_').lower()
+    # result_path = f"results/{flow_name_safe}_result.json"
+    # with open(result_path, 'w', encoding='utf-8') as f:
+    #     f.write(result if isinstance(result, str) else json.dumps(result, indent=2, ensure_ascii=False))
+    # print(f"Result saved to {result_path}")
 
     # Parse and save issues to DB
     try:
