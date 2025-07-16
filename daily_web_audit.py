@@ -36,7 +36,7 @@ browser_session = BrowserSession(
 )
 
 
-DEVELOPMENT_MODE = True  # Toggle this to False for production/full crawl
+DEVELOPMENT_MODE = False  # Toggle this to False for production/full crawl
 
 import requests
 
@@ -254,5 +254,11 @@ async def main():
         await analyzePage(flow)
 
 
+import time
+
 if __name__ == "__main__":
+    start_time = time.time()
     asyncio.run(main())
+    end_time = time.time()
+    elapsed = end_time - start_time
+    print(f"Total elapsed time: {elapsed:.2f} seconds")
