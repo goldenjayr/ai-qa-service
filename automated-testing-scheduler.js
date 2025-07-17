@@ -42,7 +42,7 @@ const task_automated_testing = new AsyncTask(
 console.log(`[${new Date().toISOString()}] Automated testing scheduler started.`)
 
 // === Automated Testing Schedule Configuration ===
-const AUTOMATED_TEST_HOUR = 11; // 24-hour format
+const AUTOMATED_TEST_HOUR = 5; // 24-hour format
 const AUTOMATED_TEST_MINUTE = 0;
 
 // Schedule to run every day at the configured time
