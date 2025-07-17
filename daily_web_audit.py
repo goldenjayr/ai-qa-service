@@ -255,6 +255,179 @@ async def main():
 
 
 import time
+from datetime import datetime, timedelta
+
+# Function to fetch today's issues, format as HTML, and send via API
+
+def send_today_issues_email():
+    try:
+        QA_SERVICE_URL = os.environ.get("QA_SERVICE_URL", "http://localhost:3000")
+        API_URL = f"{QA_SERVICE_URL}/api/issues"
+        EMAIL_API = os.environ.get("API")
+        EMAIL_ENDPOINT = f"{EMAIL_API}/send-email/qa-results" if EMAIL_API else None
+        API_USERNAME = os.environ.get("API_USERNAME")
+        API_PASSWORD = os.environ.get("API_PASSWORD")
+        AUTH = None
+        if API_USERNAME and API_PASSWORD:
+            from requests.auth import HTTPBasicAuth
+            AUTH = HTTPBasicAuth(API_USERNAME, API_PASSWORD)
+        if not EMAIL_ENDPOINT:
+            print("EMAIL API endpoint not set. Skipping email.")
+            return
+
+        resp = requests.get(API_URL, auth=AUTH)
+        if resp.status_code != 200:
+            print(f"Failed to fetch issues: {resp.text}")
+            return
+        issues = resp.json()
+        if isinstance(issues, dict) and 'issues' in issues:
+            issues = issues['issues']
+
+        if not issues:
+            # Send a positive email if no issues found
+            html_body = """
+                <div style='font-family:sans-serif;text-align:center;padding:2em;'>
+                    <h2 style='color:#22c55e;'>QA Complete: No Issues Found Today</h2>
+                    <p style='font-size:1.2em;'>🎉 Congratulations!<br><br>
+                    The automated QA audit for today has completed and <b>no issues</b> were detected.<br>
+                    Keep up the great work maintaining a high quality experience! 🚀</p>
+                </div>
+            """
+            email_payload = {
+                "subject": "QA Complete: No Issues Found Today",
+                "html_body": html_body
+            }
+            email_resp = requests.post(EMAIL_ENDPOINT, json=email_payload, auth=AUTH)
+            if email_resp.status_code == 200:
+                print("No issues found today. Success email sent.")
+            else:
+                print(f"Failed to send no-issues email: {email_resp.text}")
+            return
+
+        # Group issues by severity
+        severity_order = ['critical', 'major', 'minor']
+        grouped = {s: [] for s in severity_order}
+        grouped['other'] = []
+        for issue in issues:
+            sev = (issue.get('severity') or '').strip().lower()
+            if sev in severity_order:
+                grouped[sev].append(issue)
+            else:
+                grouped['other'].append(issue)
+
+        # HTML color map
+        row_style = {
+            'critical': 'background:#ffdddd;color:#a00;font-weight:bold;',
+            'major': 'background:#fff3cd;color:#b26a00;',
+            'minor': 'background:#ffffe0;color:#666;',
+            'other': ''
+        }
+        section_titles = {
+            'critical': 'Critical Issues',
+            'major': 'Major Issues',
+            'minor': 'Minor Issues',
+            'other': 'Other Issues'
+        }
+        # Inline styles for email-safe table
+        wrapper_style = "font-family:Segoe UI,Roboto,Arial,sans-serif;"
+        table_style = (
+            "width:100%;border-collapse:separate;border-spacing:0;"
+            "margin-bottom:2em;background:#fff;border-radius:12px;"
+            "overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.07);"
+        )
+        th_style = (
+            "background:#0ea5e9;color:#fff;font-weight:600;"
+            "padding:12px 8px;border-bottom:2px solid #e0e7ef;text-align:left;"
+        )
+        td_style = (
+            "padding:10px 8px;border-bottom:1px solid #f1f5f9;font-size:15px;"
+        )
+        even_row_style = "background:#f6fafd;"
+        hover_style = "background:#e0f2fe;"  # Not supported in most email clients but left for clarity
+        sev_row_styles = {
+            'critical': 'background:#ffdddd;color:#a00;font-weight:bold;',
+            'major': 'background:#fff3cd;color:#b26a00;',
+            'minor': 'background:#ffffe0;color:#666;',
+            'other': ''
+        }
+        html = [f"<div style='{wrapper_style}'><h2 style='margin-bottom:0.5em;color:#f59e42;'>⚠️ Issues Detected in Today's Automated QA Audit</h2>"]
+        for sev in severity_order + ['other']:
+            if not grouped[sev]:
+                continue
+            html.append(f"<h3 style='margin-top:2em;margin-bottom:0.5em;'>{section_titles[sev]}</h3>")
+            html.append(f"<table style='{table_style}'>")
+            html.append("<tr>"
+                        f"<th style='{th_style}'>Element</th>"
+                        f"<th style='{th_style}'>Page URL</th>"
+                        f"<th style='{th_style}'>Action</th>"
+                        f"<th style='{th_style}'>Expected</th>"
+                        f"<th style='{th_style}'>Actual</th>"
+                        f"<th style='{th_style}'>Error</th>"
+                        f"<th style='{th_style}'>Severity</th>"
+                        f"<th style='{th_style}'>Timestamp</th>"
+                        "</tr>")
+            for idx, issue in enumerate(grouped[sev]):
+                # Apply severity row style, and even-row background for zebra striping
+                base_style = sev_row_styles[sev]
+                zebra = even_row_style if idx % 2 == 1 and not base_style else ''
+                row_style = base_style + zebra
+                # Make pageUrl clickable if present
+                page_url = issue.get('pageUrl','')
+                if page_url:
+                    page_url_html = (
+                        f"<a href='{page_url}' style='color:#2563eb;text-decoration:underline;' target='_blank' rel='noopener noreferrer'>{page_url}</a>"
+                    )
+                else:
+                    page_url_html = ''
+                # Format timestamp to be human-readable
+                import datetime
+                raw_ts = issue.get('timestamp','')
+                readable_ts = raw_ts
+                try:
+                    # Try ISO8601 with/without timezone
+                    if raw_ts:
+                        dt = None
+                        try:
+                            dt = datetime.datetime.fromisoformat(raw_ts.replace('Z', '+00:00'))
+                        except Exception:
+                            pass
+                        if not dt:
+                            try:
+                                dt = datetime.datetime.strptime(raw_ts, '%Y-%m-%dT%H:%M:%S.%fZ')
+                            except Exception:
+                                pass
+                        if dt:
+                            readable_ts = dt.strftime('%b %d, %Y %H:%M')
+                except Exception:
+                    pass
+                html.append(
+                    f"<tr style='{row_style}'>"
+                    f"<td style='{td_style}'>{issue.get('element','')}</td>"
+                    f"<td style='{td_style}'>{page_url_html}</td>"
+                    f"<td style='{td_style}'>{issue.get('action','')}</td>"
+                    f"<td style='{td_style}'>{issue.get('expected','')}</td>"
+                    f"<td style='{td_style}'>{issue.get('actual','')}</td>"
+                    f"<td style='{td_style}'>{issue.get('error','')}</td>"
+                    f"<td style='{td_style}'>{issue.get('severity','')}</td>"
+                    f"<td style='{td_style}'>{readable_ts}</td>"
+                    f"</tr>"
+                )
+            html.append("</table>")
+        html.append("</div>")
+        html_body = "\n".join(html)
+
+        # Send POST request
+        email_payload = {
+            "subject": "Today's QA Issues Report",
+            "html_body": html_body
+        }
+        email_resp = requests.post(EMAIL_ENDPOINT, json=email_payload, auth=AUTH)
+        if email_resp.status_code == 200:
+            print("Today's issues email sent successfully.")
+        else:
+            print(f"Failed to send email: {email_resp.text}")
+    except Exception as e:
+        print(f"Error in send_today_issues_email: {e}")
 
 if __name__ == "__main__":
     start_time = time.time()
@@ -262,3 +435,6 @@ if __name__ == "__main__":
     end_time = time.time()
     elapsed = end_time - start_time
     print(f"Total elapsed time: {elapsed:.2f} seconds")
+
+    # Send today's issues as an HTML email
+    send_today_issues_email()
