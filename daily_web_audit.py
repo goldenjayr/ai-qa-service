@@ -33,6 +33,7 @@ controller = Controller(output_model=Flows)
 
 browser_session = BrowserSession(
     headless=True,
+    user_agent="Mozilla/5.0 (compatible; 23point5-Bot/1.0; +https://23point5.com/bot)"
 )
 
 
