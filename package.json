@@ -4,8 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "pm2-daily-web-audit": "pm2 start pm2-automated-testing.config.cjs",
-    "setup:pm2-audit": "bash ./setup-pm2-daily-web-audit.sh",
+    "cron": "pm2 start pm2-automated-testing.config.cjs",
     "postinstall": "prisma generate",
     "vercel-build": "prisma generate && prisma migrate deploy && next build",
     "dev": "next dev",
@@ -20,6 +19,7 @@
   },
   "dependencies": {
     "@prisma/client": "^6.11.1",
+    "croner": "^9.1.0",
     "dotenv": "^17.2.0",
     "framer-motion": "^12.23.0",
     "lucide-react": "^0.525.0",
