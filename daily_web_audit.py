@@ -76,59 +76,101 @@ async def analyzePage(flow):
     limit_clause = f"- For development speed, visit at most {PAGE_LIMIT} pages during this run." if DEVELOPMENT_MODE else ""
     task = f"""
         **OBJECTIVE**
-        Perform a comprehensive automated QA and UX analysis on the website `{flow['url']}`.
+        Perform a focused automated QA analysis on the website `{flow['url']}` to identify ONLY genuine functional issues that impact user experience.
 
-        **SCOPE**
-        - Enumerate all pages and interactive elements (buttons, links, forms, menus, etc.).
+        **CRITICAL ANALYSIS REQUIREMENTS**
+        You are an expert QA analyst. Apply strict criteria to avoid false positives:
+
+        **SCOPE & VALIDATION RULES**
+        - Test core user flows and critical interactive elements (primary buttons, forms, navigation, search)
         {limit_clause}
-        - For each element:
-            - Log its type, label/text, expected function, and the DOM selector or XPath used.
-            - Perform its action (click, submit, navigate, etc.).
-            - Check if the actual result matches the expected function.
-            - Log the full page URL and timestamp.
-            - Capture a screenshot if a failure occurs.
-            - Log any browser console or network errors that occur during the action.
-        - Record any failures, errors, unexpected behaviors, or warnings (e.g., slow response, accessibility issues).
-        - At the end, generate a report listing all actual issues found, with details.
+        - For each element tested:
+            1. **PRE-VALIDATION**: Verify the element is actually broken, not just behaving differently than expected
+            2. **FUNCTIONAL TEST**: Perform the action and wait for full completion (3-5 seconds for async operations)
+            3. **CONTEXT ANALYSIS**: Consider if the behavior makes sense in the business context
+            4. **IMPACT ASSESSMENT**: Only report if it prevents users from completing their intended action
+
+        **STRICT ISSUE CRITERIA - ONLY REPORT IF ALL CONDITIONS ARE MET:**
+
+        **CRITICAL ISSUES** (Blocks core functionality):
+        - Forms that fail to submit after multiple attempts with valid data
+        - Cart/checkout processes that fail completely
+        - Authentication systems that prevent login with correct credentials
+        - Payment processing failures
+        - 404/500 errors on core pages
+        - Complete page crashes or infinite loading (>30 seconds)
+
+        **MAJOR ISSUES** (Significantly impacts UX):
+        - Search functionality returning no results when it should
+        - Navigation links leading to wrong destinations
+        - Product images/content failing to load consistently
+        - Mobile responsive breakdowns that make content unusable
+        - Significant performance issues (>10 second load times)
+
+        **MINOR ISSUES** (Noticeable but not blocking):
+        - Minor visual inconsistencies that affect readability
+        - Slow loading elements (3-10 seconds) that eventually work
+        - Accessibility issues that impact disabled users
+
+        **DO NOT REPORT AS ISSUES:**
+        - Design choices you disagree with (colors, layouts, styling)
+        - Different behavior than competitor sites
+        - Elements that work but load slowly (<3 seconds)
+        - Pop-ups, marketing banners, or promotional content
+        - Social media integrations that are optional
+        - External service integrations that are working as designed
+        - Cookie notices, GDPR banners, or legal disclaimers
+        - Cosmetic spacing or alignment issues
+        - Elements that require user interaction to activate (hover states, dropdowns)
+        - Features that are intentionally restricted (guest checkout, member-only content)
+
+        **VERIFICATION PROTOCOL**
+        Before reporting any issue:
+        1. **Retry the action 2-3 times** to confirm it's consistently broken
+        2. **Wait for full loading** - many modern sites use lazy loading and async operations
+        3. **Check console errors** - only report if there are actual JavaScript errors causing the malfunction
+        4. **Verify user impact** - ask "Does this prevent a user from completing their goal?"
+        5. **Consider business logic** - some restrictions might be intentional
 
         **OUTPUT FORMAT**
-        Output only a detailed, actionable list of all issues actually found during the test, in the following markdown format:
+        Report ONLY verified, impactful issues using this format:
 
-        # Test Issues Report
+        # Verified Issues Report
 
-        ## Issues Found
+        ## Critical Issues Found
+        [Only include issues that completely block core functionality]
 
-        For each issue, include:
-        - **Element:** (e.g., button label, form name, or page route)
-        - **Page URL:** (full URL where issue was found)
-        - **DOM Selector/XPath:** (if available)
-        - **Action:** (e.g., click, submit, navigation)
-        - **Expected:** (expected result/behavior)
-        - **Actual:** (actual result/behavior)
-        - **Error:** (error message, stack trace, or symptom if any)
-        - **Console/Network Errors:** (any relevant browser errors)
-        - **Screenshot:** (file path or link, if captured)
-        - **Severity:** (blocker, critical, minor, warning)
-        - **Timestamp:** (when the issue was detected)
-        - **Steps to Reproduce:** (step-by-step, if relevant)
+        ## Major Issues Found
+        [Only include issues that significantly impact user experience]
 
-        Example:
-        1. **Element:** "Add to Cart" button on /product/123
-           **Page URL:** https://wear.23point5.com/product/123
-           **DOM Selector:** button.add-to-cart
-           **Action:** Click
-           **Expected:** Item added to cart and confirmation shown
-           **Actual:** No confirmation, item not added
-           **Error:** JS console error: `Cannot read property 'cart' of undefined`
-           **Console/Network Errors:** See attached log
-           **Screenshot:** ./screenshots/add-to-cart-error.png
-           **Severity:** Critical
-           **Timestamp:** 2025-07-10T01:48:43+08:00
-           **Steps to Reproduce:**
-             - Go to /product/123
-             - Click "Add to Cart"
+        ## Minor Issues Found
+        [Only include issues that are noticeable but not blocking]
 
-        Only include actual issues found. Do not include summaries, highlights, or recommendations.
+        For each genuine issue, include:
+        - **Element:** (specific element that failed)
+        - **Page URL:** (exact URL where issue occurs)
+        - **DOM Selector:** (if relevant for developers)
+        - **Action:** (what action was performed)
+        - **Expected:** (what should happen based on standard web conventions)
+        - **Actual:** (what actually happened, be specific)
+        - **Error:** (exact error message or symptom)
+        - **Console/Network Errors:** (only if relevant JavaScript/network errors exist)
+        - **Screenshot:** (if captured during failure)
+        - **Severity:** (critical, major, or minor based on criteria above)
+        - **Timestamp:** (when detected)
+        - **Steps to Reproduce:** (precise steps that consistently reproduce the issue)
+        - **Verification:** (confirm you tested this 2-3 times and it consistently fails)
+
+        **FINAL VALIDATION**
+        Before submitting your report, ask yourself:
+        - Would this issue prevent a real user from completing their purchase/goal?
+        - Is this actually broken, or just designed differently than I expected?
+        - Did I wait long enough for async operations to complete?
+        - Is this a genuine functional failure or just a design preference?
+
+        If you cannot answer "yes" to the first question, DO NOT include it in your report.
+
+        **If no genuine issues are found, return: "No functional issues detected during testing."**
     """
     agent = Agent(
         task=task,
@@ -175,79 +217,6 @@ async def main():
             "url": "https://wear.23point5.com",
             "service_type": "storefront",
         },
-        # {
-        #     "flow_name": "Dashboard Site Health and Core Functionality Check",
-        #     "flow_type": "system_check",
-        #     "url": "https://dashboard.23point5.com",
-        #     "service_type": "dashboard",
-        #     "steps": [
-        #         "Step 1: Visit the homepage and record the HTTP status code. If 200, set `status` to 'Operational'.",
-        #         "Step 2: Login to the dashboard using these credentials: username: jayr@23point5.com, password: 23Point5!!",
-        #         "Step 3: Measure page load time (in ms) and store as `avgLatency`.",
-        #         "Step 4: During navigation, track failed requests (4xx/5xx) and calculate `errorRate` as (failures / total requests).",
-        #         "Step 5: Visit at least 3 key pages. If all load correctly, assign a `healthScore` example: ~99%.",
-        #         "Step 6: Based on above results, generate a rough `aiSummary` describing if the site is generally working fine."
-        #     ]
-        # },
-        # {
-        #     "flow_name": "Design Studio Functionality and Stability Check",
-        #     "flow_type": "system_check",
-        #     "url": "https://design.23point5.com",
-        #     "service_type": "design-studio",
-        #     "steps": [
-        #         "Step 1: Access the design studio homepage and record the HTTP status code. If 200, set `status` to 'Operational'.",
-        #         "Step 2: Login using the following credentials: username: jayr@23point5.com, password: 23Point5!!",
-        #         "Step 3: Select a garment style (e.g., hoodie, t-shirt, sweatshirt). If style loads successfully, continue.",
-        #         "Step 4: Wait for the 3D canvas to fully render. Allow a few seconds for model and textures to load completely.",
-        #         "Step 5: Record the time until the design canvas becomes fully interactive as `canvasLoadTime` (in ms).",
-        #         "Step 6: Test core design actions: (a) add an image, (b) apply a solid color, (c) add text, (d) edit the text (font, size, position). Confirm each executes without bugs.",
-        #         "Step 7: Track all network requests during design interactions. Count any failed requests (4xx/5xx) and compute `errorRate` = (failures / total requests).",
-        #         "Step 8: If all core features function and there are no critical errors, assign a `healthScore` (e.g., 98–100%).",
-        #         "Step 9: Generate an `aiSummary` that briefly evaluates if the design experience is smooth, functional, and production-ready."
-        #     ]
-        # }
-
-        # {
-        #     "flow_name": "Homepage to Product Discovery Flow",
-        #     "flow_type": "User Journey - Top of Funnel",
-        #     "url": "https://wear.23point5.com",
-        #     "steps": [
-        #         "Step 1: User lands on the homepage (wear.23point5.com).",
-        #         "Step 2: User is presented with featured collections, new arrivals, or specific brand promotions (e.g., The Beatles, Care Bears).",
-        #         "Step 3: User chooses a path: clicks on a promotional banner, uses the main navigation menu ('Products', 'Brands'), or uses the search bar.",
-        #         "Step 4: User navigates to a collection/listing page, displaying multiple products.",
-        #         "Step 5: User scrolls through the products and clicks on an item image or title to view its details."
-        #     ]
-        # },
-        # {
-        #     "flow_name": "Product Page to Add To Cart Flow",
-        #     "flow_type": "Conversion - Mid-Funnel",
-        #     "url": "https://wear.23point5.com",
-        #     "steps": [
-        #         "Step 1: User is on a specific product page.",
-        #         "Step 2: User views product images, description, and price.",
-        #         "Step 3: User selects a required product option, such as 'Size' (e.g., S, M, L, XL), from a dropdown or button list.",
-        #         "Step 4: User may adjust the 'Quantity' for the selected item.",
-        #         "Step 5: User clicks the primary call-to-action button, labeled 'Add to Cart' or similar.",
-        #         "Step 6: A confirmation appears (e.g., a slide-out cart drawer or a mini-modal) showing the item has been added, along with the subtotal."
-        #     ]
-        # },
-        # {
-        #     "flow_name": "Shopping Cart and Checkout Flow",
-        #     "flow_type": "Conversion - Bottom of Funnel",
-        #     "url": "https://wear.23point5.com",
-        #     "steps": [
-        #         "Step 1: After adding an item, the user navigates to the full shopping cart page by clicking 'View Cart' or a cart icon.",
-        #         "Step 2: On the cart page, the user reviews all added items, can update quantities, remove items, or add notes to their order.",
-        #         "Step 3: User sees the order subtotal and clicks the 'Checkout' or 'Secure Checkout' button.",
-        #         "Step 4: User is taken to the first page of the Shopify checkout process, where they enter their email and shipping address.",
-        #         "Step 5: User proceeds to the next step to select a shipping method (e.g., Standard Shipping).",
-        #         "Step 6: User enters payment information (Credit Card, PayPal, etc.) in the final step.",
-        #         "Step 7: User reviews all information (contact, shipping address, payment method, and total cost) before finalizing the purchase.",
-        #         "Step 8: User clicks the 'Pay Now' or 'Complete Order' button."
-        #     ]
-        # }
-
     ]
     for flow in flows:
         # Run the comprehensive element/functionality check for each flow
