@@ -262,7 +262,7 @@ from datetime import datetime, timedelta
 def send_today_issues_email():
     try:
         QA_SERVICE_URL = os.environ.get("QA_SERVICE_URL", "http://localhost:3000")
-        API_URL = f"{QA_SERVICE_URL}/api/issues"
+        API_URL = f"{QA_SERVICE_URL}/api/issues?today=true"
         EMAIL_API = os.environ.get("API")
         EMAIL_ENDPOINT = f"{EMAIL_API}/send-email/qa-results" if EMAIL_API else None
         API_USERNAME = os.environ.get("API_USERNAME")
@@ -363,6 +363,7 @@ def send_today_issues_email():
                         f"<th style='{th_style}'>Expected</th>"
                         f"<th style='{th_style}'>Actual</th>"
                         f"<th style='{th_style}'>Error</th>"
+                        f"<th style='{th_style}'>Steps To Reproduce</th>"
                         f"<th style='{th_style}'>Severity</th>"
                         f"<th style='{th_style}'>Timestamp</th>"
                         "</tr>")
@@ -400,6 +401,18 @@ def send_today_issues_email():
                             readable_ts = dt.strftime('%b %d, %Y %H:%M')
                 except Exception:
                     pass
+                # Format steps to reproduce as HTML<br>-joined list
+                steps = issue.get('stepsToReproduce') or issue.get('steps_to_reproduce') or []
+                if isinstance(steps, str):
+                    try:
+                        import json as _json
+                        steps = _json.loads(steps)
+                    except Exception:
+                        steps = [steps]
+                if isinstance(steps, list):
+                    steps_html = '<br>'.join(str(s) for s in steps)
+                else:
+                    steps_html = str(steps)
                 html.append(
                     f"<tr style='{row_style}'>"
                     f"<td style='{td_style}'>{issue.get('element','')}</td>"
@@ -408,6 +421,7 @@ def send_today_issues_email():
                     f"<td style='{td_style}'>{issue.get('expected','')}</td>"
                     f"<td style='{td_style}'>{issue.get('actual','')}</td>"
                     f"<td style='{td_style}'>{issue.get('error','')}</td>"
+                    f"<td style='{td_style}'>{steps_html}</td>"
                     f"<td style='{td_style}'>{issue.get('severity','')}</td>"
                     f"<td style='{td_style}'>{readable_ts}</td>"
                     f"</tr>"
