@@ -1,3 +1,6 @@
+from datetime import datetime, timedelta
+import time
+import requests
 import asyncio
 import json
 import os
@@ -6,6 +9,7 @@ from browser_use.llm import ChatGoogle
 from pydantic import BaseModel
 
 from typing import List, Optional
+
 
 class Issue(BaseModel):
     element: str
@@ -21,9 +25,11 @@ class Issue(BaseModel):
     timestamp: Optional[str]
     steps_to_reproduce: List[str]
 
+
 class Flow(BaseModel):
     flow_name: str
     issues: List[Issue]
+
 
 class Flows(BaseModel):
     flows: List[Flow]
@@ -39,7 +45,6 @@ browser_session = BrowserSession(
 
 DEVELOPMENT_MODE = False  # Toggle this to False for production/full crawl
 
-import requests
 
 async def save_issues_to_db(flow_name, issues):
     QA_SERVICE_URL = os.environ.get("QA_SERVICE_URL", "http://localhost:3000")
@@ -94,10 +99,8 @@ async def analyzePage(flow):
         **STRICT ISSUE CRITERIA - ONLY REPORT IF ALL CONDITIONS ARE MET:**
 
         **CRITICAL ISSUES** (Blocks core functionality):
-        - Forms that fail to submit after multiple attempts with valid data
-        - Cart/checkout processes that fail completely
+        - Cart processes that fail completely
         - Authentication systems that prevent login with correct credentials
-        - Payment processing failures
         - 404/500 errors on core pages
         - Complete page crashes or infinite loading (>30 seconds)
 
@@ -182,6 +185,7 @@ async def analyzePage(flow):
         max_failures=20
     )
     history = await agent.run()
+    await browser_session.close()
     result = history.final_result()
     print(result)
     # # Save result to a JSON file in the results folder
@@ -224,14 +228,13 @@ async def main():
         await analyzePage(flow)
 
 
-import time
-from datetime import datetime, timedelta
-
 # Function to fetch today's issues, format as HTML, and send via API
+
 
 def send_today_issues_email():
     try:
-        QA_SERVICE_URL = os.environ.get("QA_SERVICE_URL", "http://localhost:3000")
+        QA_SERVICE_URL = os.environ.get(
+            "QA_SERVICE_URL", "http://localhost:3000")
         API_URL = f"{QA_SERVICE_URL}/api/issues?today=true"
         EMAIL_API = os.environ.get("API")
         EMAIL_ENDPOINT = f"{EMAIL_API}/send-email/qa-results" if EMAIL_API else None
@@ -267,7 +270,8 @@ def send_today_issues_email():
                 "subject": "QA Complete: No Issues Found Today",
                 "html_body": html_body
             }
-            email_resp = requests.post(EMAIL_ENDPOINT, json=email_payload, auth=AUTH)
+            email_resp = requests.post(
+                EMAIL_ENDPOINT, json=email_payload, auth=AUTH)
             if email_resp.status_code == 200:
                 print("No issues found today. Success email sent.")
             else:
@@ -313,18 +317,21 @@ def send_today_issues_email():
             "padding:10px 8px;border-bottom:1px solid #f1f5f9;font-size:15px;"
         )
         even_row_style = "background:#f6fafd;"
-        hover_style = "background:#e0f2fe;"  # Not supported in most email clients but left for clarity
+        # Not supported in most email clients but left for clarity
+        hover_style = "background:#e0f2fe;"
         sev_row_styles = {
             'critical': 'background:#ffdddd;color:#a00;font-weight:bold;',
             'major': 'background:#fff3cd;color:#b26a00;',
             'minor': 'background:#ffffe0;color:#666;',
             'other': ''
         }
-        html = [f"<div style='{wrapper_style}'><h2 style='margin-bottom:0.5em;color:#f59e42;'>⚠️ Issues Detected in Today's Automated QA Audit</h2>"]
+        html = [
+            f"<div style='{wrapper_style}'><h2 style='margin-bottom:0.5em;color:#f59e42;'>⚠️ Issues Detected in Today's Automated QA Audit</h2>"]
         for sev in severity_order + ['other']:
             if not grouped[sev]:
                 continue
-            html.append(f"<h3 style='margin-top:2em;margin-bottom:0.5em;'>{section_titles[sev]}</h3>")
+            html.append(
+                f"<h3 style='margin-top:2em;margin-bottom:0.5em;'>{section_titles[sev]}</h3>")
             html.append(f"<table style='{table_style}'>")
             html.append("<tr>"
                         f"<th style='{th_style}'>Element</th>"
@@ -343,7 +350,7 @@ def send_today_issues_email():
                 zebra = even_row_style if idx % 2 == 1 and not base_style else ''
                 row_style = base_style + zebra
                 # Make pageUrl clickable if present
-                page_url = issue.get('pageUrl','')
+                page_url = issue.get('pageUrl', '')
                 if page_url:
                     page_url_html = (
                         f"<a href='{page_url}' style='color:#2563eb;text-decoration:underline;' target='_blank' rel='noopener noreferrer'>{page_url}</a>"
@@ -352,19 +359,21 @@ def send_today_issues_email():
                     page_url_html = ''
                 # Format timestamp to be human-readable
                 import datetime
-                raw_ts = issue.get('timestamp','')
+                raw_ts = issue.get('timestamp', '')
                 readable_ts = raw_ts
                 try:
                     # Try ISO8601 with/without timezone
                     if raw_ts:
                         dt = None
                         try:
-                            dt = datetime.datetime.fromisoformat(raw_ts.replace('Z', '+00:00'))
+                            dt = datetime.datetime.fromisoformat(
+                                raw_ts.replace('Z', '+00:00'))
                         except Exception:
                             pass
                         if not dt:
                             try:
-                                dt = datetime.datetime.strptime(raw_ts, '%Y-%m-%dT%H:%M:%S.%fZ')
+                                dt = datetime.datetime.strptime(
+                                    raw_ts, '%Y-%m-%dT%H:%M:%S.%fZ')
                             except Exception:
                                 pass
                         if dt:
@@ -372,7 +381,8 @@ def send_today_issues_email():
                 except Exception:
                     pass
                 # Format steps to reproduce as HTML<br>-joined list
-                steps = issue.get('stepsToReproduce') or issue.get('steps_to_reproduce') or []
+                steps = issue.get('stepsToReproduce') or issue.get(
+                    'steps_to_reproduce') or []
                 if isinstance(steps, str):
                     try:
                         import json as _json
@@ -385,14 +395,14 @@ def send_today_issues_email():
                     steps_html = str(steps)
                 html.append(
                     f"<tr style='{row_style}'>"
-                    f"<td style='{td_style}'>{issue.get('element','')}</td>"
+                    f"<td style='{td_style}'>{issue.get('element', '')}</td>"
                     f"<td style='{td_style}'>{page_url_html}</td>"
-                    f"<td style='{td_style}'>{issue.get('action','')}</td>"
-                    f"<td style='{td_style}'>{issue.get('expected','')}</td>"
-                    f"<td style='{td_style}'>{issue.get('actual','')}</td>"
-                    f"<td style='{td_style}'>{issue.get('error','')}</td>"
+                    f"<td style='{td_style}'>{issue.get('action', '')}</td>"
+                    f"<td style='{td_style}'>{issue.get('expected', '')}</td>"
+                    f"<td style='{td_style}'>{issue.get('actual', '')}</td>"
+                    f"<td style='{td_style}'>{issue.get('error', '')}</td>"
                     f"<td style='{td_style}'>{steps_html}</td>"
-                    f"<td style='{td_style}'>{issue.get('severity','')}</td>"
+                    f"<td style='{td_style}'>{issue.get('severity', '')}</td>"
                     f"<td style='{td_style}'>{readable_ts}</td>"
                     f"</tr>"
                 )
@@ -405,13 +415,15 @@ def send_today_issues_email():
             "subject": "Today's QA Issues Report",
             "html_body": html_body
         }
-        email_resp = requests.post(EMAIL_ENDPOINT, json=email_payload, auth=AUTH)
+        email_resp = requests.post(
+            EMAIL_ENDPOINT, json=email_payload, auth=AUTH)
         if email_resp.status_code == 200:
             print("Today's issues email sent successfully.")
         else:
             print(f"Failed to send email: {email_resp.text}")
     except Exception as e:
         print(f"Error in send_today_issues_email: {e}")
+
 
 if __name__ == "__main__":
     start_time = time.time()
